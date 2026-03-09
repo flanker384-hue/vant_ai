@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+<meta charset="UTF-8">
+<title>VANT AI</title>
+
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+
+<style>
+
+body{
+margin:0;
+font-family:Arial, Helvetica, sans-serif;
+background:#0f172a;
+color:white;
+display:flex;
+flex-direction:column;
+height:100vh;
+}
+
+.header{
+padding:15px;
+background:#020617;
+border-bottom:1px solid #1e293b;
+font-size:20px;
+font-weight:bold;
+text-align:center;
+}
+
+.chat-container{
+flex:1;
+overflow-y:auto;
+padding:20px;
+display:flex;
+flex-direction:column;
+gap:15px;
+}
+
+.message{
+padding:14px;
+border-radius:10px;
+max-width:75%;
+line-height:1.6;
+white-space:pre-wrap;
+}
+
+.user{
+background:#2563eb;
+margin-left:auto;
+}
+
+.ai{
+background:#1e293b;
+}
+
+.copy-btn{
+margin-top:8px;
+background:#334155;
+border:none;
+padding:6px 10px;
+border-radius:6px;
+color:white;
+cursor:pointer;
+font-size:12px;
+}
+
+.input-area{
+display:flex;
+padding:15px;
+background:#020617;
+border-top:1px solid #1e293b;
+position:sticky;
+bottom:0;
+}
+
+.input-area input{
+flex:1;
+padding:12px;
+border-radius:8px;
+border:none;
+outline:none;
+background:#1e293b;
+color:white;
+font-size:15px;
+}
+
+.input-area button{
+margin-left:10px;
+padding:12px 16px;
+border:none;
+border-radius:8px;
+background:#2563eb;
+color:white;
+cursor:pointer;
+}
+
+.thinking{
+font-style:italic;
+opacity:0.7;
+}
+
+.dots::after{
+content:"";
+animation:dots 1.5s infinite;
+}
+
+@keyframes dots{
+0%{content:""}
+33%{content:"."}
+66%{content:".."}
+100%{content:"..."}
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="header">
+⚡ VANT AI
+</div>
+
+<div id="chat" class="chat-container"></div>
+
+<div class="input-area">
+<input id="userInput" placeholder="Ask VANT AI anything...">
+<button onclick="sendMessage()">Send</button>
+</div>
+
+<script>
+
+const chat=document.getElementById("chat")
+const input=document.getElementById("userInput")
+
+input.addEventListener("keypress",function(e){
+if(e.key==="Enter") sendMessage()
+})
+
+function addUserMessage(text){
+
+let msg=document.createElement("div")
+msg.className="message user"
+msg.innerText=text
+
+chat.appendChild(msg)
+chat.scrollTop=chat.scrollHeight
+
+}
+
+function addAIContainer(){
+
+let msg=document.createElement("div")
+msg.className="message ai"
+
+chat.appendChild(msg)
+chat.scrollTop=chat.scrollHeight
+
+return msg
+
+}
+
+function addCopyButton(text,container){
+
+let copy=document.createElement("button")
+copy.innerText="Copy"
+copy.className="copy-btn"
+
+copy.onclick=()=>navigator.clipboard.writeText(text)
+
+container.appendChild(copy)
+
+}
+
+function showThinking(){
+
+let msg=document.createElement("div")
+msg.className="message ai thinking"
+msg.id="thinking"
+
+msg.innerHTML="VANT AI is thinking<span class='dots'></span>"
+
+chat.appendChild(msg)
+chat.scrollTop=chat.scrollHeight
+
+}
+
+function removeThinking(){
+
+let think=document.getElementById("thinking")
+if(think) think.remove()
+
+}
+
+function typeMessage(text,container){
+
+let html=marked.parse(text)
+let temp=document.createElement("div")
+temp.innerHTML=html
+
+let words=temp.innerHTML.split(" ")
+
+let i=0
+
+function typing(){
+
+if(i<words.length){
+
+container.innerHTML+=words[i]+" "
+chat.scrollTop=chat.scrollHeight
+
+i++
+
+setTimeout(typing,25)
+
+}else{
+
+addCopyButton(text,container)
+
+}
+
+}
+
+typing()
+
+}
+
+async function sendMessage(){
+
+let text=input.value.trim()
+
+if(!text) return
+
+addUserMessage(text)
+
+input.value=""
+
+showThinking()
+
+let res=await fetch("/ask",{
+method:"POST",
+headers:{"Content-Type":"application/json"},
+body:JSON.stringify({message:text})
+})
+
+let data=await res.json()
+
+removeThinking()
+
+let aiBox=addAIContainer()
+
+typeMessage(data.answer,aiBox)
+
+}
+
+</script>
+
+</body>
+</html>
