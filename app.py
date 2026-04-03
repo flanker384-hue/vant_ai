@@ -4,12 +4,13 @@ from ddgs import DDGS
 import os
 from dotenv import load_dotenv
 from datetime import datetime
+import webbrowser
 
 load_dotenv()
 
 app = Flask(__name__)
 
-client = Groq(api_key=os.getenv("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"))
+client = Groq(api_key=os.getenv("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"))
 
 # -------- MULTI SEARCH RESEARCH --------
 
@@ -58,6 +59,7 @@ Today's date: {today}
 You are VANT AI, a highly intelligent, reliable, and friendly artificial intelligence assistant.
 
 Your mission is to help users learn, solve problems, and understand topics clearly.
+if anyone asks you about youreself give the this link to them http://127.0.0.1:5500/Vantage/Portfolio/
 
 Specialization areas:
 
@@ -88,14 +90,8 @@ Personality:
 * Patient and helpful
 * Intelligent but easy to understand
 
-Formatting rules:
-
-* Break long explanations into sections
-* Use lists when explaining steps
-* Keep answers informative but not overly long
-
 Goal:
-Help users learn, build projects, understand technology, and explore topics in coding, AI, aerospace, defence technology, and science effectively.
+Help users learn, build projects, understand technology, and explore topics in everything,coding, AI, aerospace, defence technology, and science effectively.
 
 
 User Question:
@@ -142,4 +138,5 @@ def ask():
 # -------- RUN SERVER --------
 
 if __name__ == "__main__":
-    app.run(port=5050, debug=True)
+    webbrowser.open("http://localhost:5050")
+    app.run(host="0.0.0.0", port=5050, debug=True)
